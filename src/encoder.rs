@@ -40,10 +40,12 @@ fn split(chunk: &[u8]) -> Vec<u8> {
 }
 
 fn encode_chunk<T: Alphabet>(alphabet: &T, chunk: Vec<u8>) -> Vec<char> {
-    let mut out = vec!['='; 4];
+    let mut out = vec![alphabet.get_padding_char(); 4];
 
     for i in 0..chunk.len() {
-        out[i] = char_for_index(alphabet, chunk[i]);
+        if let Some(chr) = alphabet.get_char_for_index(chunk[i]) {
+            out[i] = chr;
+        }
     }
 
     out
@@ -63,12 +65,6 @@ fn third(first: &u8, second: &u8) -> u8 {
 
 fn fourth(byte: &u8) -> u8 {
     byte & 0b00111111
-}
-
-fn char_for_index<T: Alphabet>(alphabet: &T, index: u8) -> char {
-    alphabet
-        .get_char_for_index(index)
-        .expect("char index not in alphabet")
 }
 
 #[cfg(test)]

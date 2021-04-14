@@ -1,6 +1,7 @@
 pub trait Alphabet {
     fn get_char_for_index(&self, index: u8) -> Option<char>;
     fn get_index_for_char(&self, character: char) -> Option<u8>;
+    fn get_padding_char(&self) -> char;
 }
 
 
@@ -39,5 +40,9 @@ impl Alphabet for Classic {
         } as u8;
 
         Some(base64_index)
+    }
+
+    fn get_padding_char(&self) -> char {
+        '='
     }
 }

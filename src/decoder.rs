@@ -24,7 +24,7 @@ pub fn decode_using_alphabet<T: Alphabet>(alphabet: T, data: &String) -> Vec<u8>
 fn original<T: Alphabet>(alphabet: &T, chunk: &[char]) -> Vec<u8> {
     chunk
         .iter()
-        .filter(|character| *character != &'=')
+        .filter(|character| *character != &alphabet.get_padding_char())
         .map(|character| index_for_char(alphabet, &character))
         .collect()
 }
