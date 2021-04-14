@@ -16,7 +16,6 @@ mod tests {
         let input_str = "and there we are again. Back and forth, through the algoritm!";
         let input_data = input_str.as_bytes();
         let encoded = encode(input_data);
-        println!("got encoded: {}", encoded);
         let decoded = decode(&encoded);
         assert_eq!(decoded, input_data);
     }

@@ -9,60 +9,56 @@ pub fn encode(data: &[u8]) -> String {
 pub fn encode_using_alphabet<T: Alphabet>(alphabet: &T, data: &[u8]) -> String {
     let encoded = data
         .chunks(3)
+        .map(split)
         .flat_map(|chunk| encode_chunk(alphabet, chunk));
 
     String::from_iter(encoded)
 }
 
-fn encode_chunk<T: Alphabet>(alphabet: &T, chunk: &[u8]) -> Vec<char> {
+fn split(chunk: &[u8]) -> Vec<u8> {
     match chunk.len() {
         1 => vec![
-            char_for_index(alphabet, first(&chunk[0])), 
-            char_for_index(alphabet, second(&chunk[0], &0)),
-            '=', 
-            '='
+            first(&chunk[0]),
+            second(&chunk[0], &0)
         ],
 
         2 => vec![
-            char_for_index(alphabet, first(&chunk[0])),
-            char_for_index(alphabet, second(&chunk[0], &chunk[1])),
-            char_for_index(alphabet, third(&chunk[1], &0)),
-            '='
+            first(&chunk[0]),
+            second(&chunk[0], &chunk[1]),
+            third(&chunk[1], &0)
         ],
 
         3 => vec![
-            char_for_index(alphabet, first(&chunk[0])),
-            char_for_index(alphabet, second(&chunk[0], &chunk[1])),
-            char_for_index(alphabet, third(&chunk[1], &chunk[2])),
-            char_for_index(alphabet, fourth(&chunk[2])),
+            first(&chunk[0]),
+            second(&chunk[0], &chunk[1]),
+            third(&chunk[1], &chunk[2]),
+            fourth(&chunk[2])
         ],
 
-        _ => unreachable!("index cannot be outside of 0 through 2"),
+        _ => unreachable!()
     }
+}
+
+fn encode_chunk<T: Alphabet>(alphabet: &T, chunk: Vec<u8>) -> Vec<char> {
+    let mut out = vec!['='; 4];
+
+    for i in 0..chunk.len() {
+        out[i] = char_for_index(alphabet, chunk[i]);
+    }
+
+    out
 }
 
 fn first(byte: &u8) -> u8 {
     byte >> 2
 }
 
-fn second(byte: &u8, second: &u8) -> u8 {
-    // take the last two bits, shift them 4 positions left
-    let part_one = (byte & 0b00000011) << 4;
-
-    // take the first four bits
-    let part_two = second >> 4;
-
-    part_one | part_two
+fn second(first: &u8, second: &u8) -> u8 {
+    (first & 0b00000011) << 4 | second >> 4
 }
 
 fn third(first: &u8, second: &u8) -> u8 {
-    // take the last two bits, shift them 4 positions left
-    let part_one = (first & 0b00001111) << 2;
-
-    // take the first four bits
-    let part_two = second >> 6;
-
-    part_one | part_two
+    (first & 0b00001111) << 2 | second >> 6
 }
 
 fn fourth(byte: &u8) -> u8 {
