@@ -7,7 +7,7 @@ pub fn decode(bytes: &String) -> Vec<u8> {
 
 pub fn decode_using_alphabet<T: Alphabet>(alphabet: T, data: &String) -> Vec<u8> {
     // if data is not multiple of four bytes, data is invalid
-    if data.len() % 4 != 0 {
+    if data.chars().count() % 4 != 0 {
         panic!("Invalid data");
     }
 
@@ -24,7 +24,11 @@ fn original<T: Alphabet>(alphabet: &T, chunk: &[char]) -> Vec<u8> {
     chunk
         .iter()
         .filter(|character| *character != &alphabet.get_padding_char())
-        .map(|character| index_for_char(alphabet, &character))
+        .map(|character| { 
+            alphabet
+                .get_index_for_char(*character)
+                .expect("unable to find character in alphabet")
+        })
         .collect()
 }
 
@@ -51,12 +55,6 @@ fn stitch(bytes: Vec<u8>) -> Vec<u8> {
     };
 
     out.into_iter().filter(|&x| x > 0).collect()
-}
-
-fn index_for_char<T: Alphabet>(alphabet: &T, byte: &char) -> u8 {
-    alphabet
-        .get_index_for_char(*byte)
-        .expect("unable to find character in alphabet")
 }
 
 #[cfg(test)]
