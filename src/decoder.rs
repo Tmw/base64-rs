@@ -11,7 +11,6 @@ pub fn decode_using_alphabet<T: Alphabet>(alphabet: T, data: &String) -> Vec<u8>
         panic!("Invalid data");
     }
 
-    // turn encoded bytes back into a bitvec
     data
         .chars()
         .collect::<Vec<char>>()

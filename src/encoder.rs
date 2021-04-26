@@ -18,21 +18,21 @@ pub fn encode_using_alphabet<T: Alphabet>(alphabet: &T, data: &[u8]) -> String {
 fn split(chunk: &[u8]) -> Vec<u8> {
     match chunk.len() {
         1 => vec![
-            first(&chunk[0]),
-            second(&chunk[0], &0)
+            &chunk[0] >> 2,
+            (&chunk[0] & 0b00000011) << 4
         ],
 
         2 => vec![
-            first(&chunk[0]),
-            second(&chunk[0], &chunk[1]),
-            third(&chunk[1], &0)
+            &chunk[0] >> 2,
+            (&chunk[0] & 0b00000011) << 4 | &chunk[1] >> 4,
+            (&chunk[1] & 0b00001111) << 2,
         ],
 
         3 => vec![
-            first(&chunk[0]),
-            second(&chunk[0], &chunk[1]),
-            third(&chunk[1], &chunk[2]),
-            fourth(&chunk[2])
+            &chunk[0] >> 2,
+            (&chunk[0] & 0b00000011) << 4 | &chunk[1] >> 4,
+            (&chunk[1] & 0b00001111) << 2 | &chunk[2] >> 6,
+            &chunk[2] & 0b00111111
         ],
 
         _ => unreachable!()
@@ -49,22 +49,6 @@ fn encode_chunk<T: Alphabet>(alphabet: &T, chunk: Vec<u8>) -> Vec<char> {
     }
 
     out
-}
-
-fn first(byte: &u8) -> u8 {
-    byte >> 2
-}
-
-fn second(first: &u8, second: &u8) -> u8 {
-    (first & 0b00000011) << 4 | second >> 4
-}
-
-fn third(first: &u8, second: &u8) -> u8 {
-    (first & 0b00001111) << 2 | second >> 6
-}
-
-fn fourth(byte: &u8) -> u8 {
-    byte & 0b00111111
 }
 
 #[cfg(test)]

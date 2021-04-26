@@ -4,7 +4,6 @@ pub trait Alphabet {
     fn get_padding_char(&self) -> char;
 }
 
-
 pub struct Classic;
 const UPPERCASEOFFSET: i8 = 65;
 const LOWERCASEOFFSET: i8 = 71;
