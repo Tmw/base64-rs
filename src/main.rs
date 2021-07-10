@@ -3,14 +3,13 @@ mod encoder;
 mod decoder;
 
 use std::io::{self, Read};
+use std::fmt;
 
 enum CLIError {
     TooLittleArguments,
     InvalidSubcommand(String),
     StdInUnreadable,
 }
-
-use std::fmt;
 
 impl std::fmt::Debug for CLIError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -47,7 +46,7 @@ fn read_stdin() -> Result<String, CLIError> {
     let mut input = String::new();
     io::stdin()
         .read_to_string(&mut input)
-        .map_err(|_| CLIError::StdInUnreadable )?;
+        .map_err(|_| CLIError::StdInUnreadable)?;
 
     Ok(input.trim().to_string())
 }
