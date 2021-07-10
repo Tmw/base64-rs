@@ -4,58 +4,62 @@ mod decoder;
 
 use std::io::{self, Read};
 
-fn error(message: &str) {
-    println!("Error: {}", message);
-    std::process::exit(1);
+enum CLIError {
+    TooLittleArguments,
+    InvalidSubcommand(String),
+    StdInUnreadable,
 }
 
-fn main() -> io::Result<()> {
+use std::fmt;
+
+impl std::fmt::Debug for CLIError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            Self::TooLittleArguments => write!(f, "Too little arguments provided"),
+            Self::InvalidSubcommand(cmd) => write!(f, "Invalid subcommand provided: \"{}\"", cmd),
+            Self::StdInUnreadable => write!(f, "Unable to read STDIN"),
+        }
+    }
+}
+
+fn main() -> Result<(), CLIError> {
     if std::env::args().count() < 2 {
-        error("Too little arguments");
+        return Err(CLIError::TooLittleArguments)
     }
 
-    match std::env::args().nth(1) {
-        Some(subcommand) => parse_input(subcommand),
-        None => error("Subcommand not found"),
-    }
+    let subcommand = std::env::args().nth(1)
+        .ok_or_else(|| CLIError::TooLittleArguments)?;
+
+    let input = read_stdin()?;
+
+    let output = match subcommand.as_str() {
+        "encode" => Ok(encode(&input)),
+        "decode" => Ok(decode(&input)),
+        cmd => Err(CLIError::InvalidSubcommand(cmd.to_string())),
+    }?;
+
+    print!("{}", output);
 
     Ok(())
 }
 
-fn parse_input(subcommand: String) {
-    match subcommand.as_str() {
-        "encode" => encode(),
-        "decode" => decode(),
-        subcommand => {
-            let error_message = format!("subcommand {} not recognized", subcommand);
-            error(error_message.as_str());
-        },
-    }
+fn read_stdin() -> Result<String, CLIError> {
+    let mut input = String::new();
+    io::stdin()
+        .read_to_string(&mut input)
+        .map_err(|_| CLIError::StdInUnreadable )?;
+
+    Ok(input.trim().to_string())
 }
 
-fn encode() {
-    let mut input = String::new();
-    match io::stdin().read_to_string(&mut input) {
-        Ok(_) => {
-            let encoded = encoder::encode(input.trim().as_bytes());
-            print!("{}", encoded);
-        },
-
-        Err(_) => error("Unable to read STDIN"),
-    }
+fn encode(input: &String) -> String {
+    encoder::encode(input.as_bytes())
 }
 
-fn decode() {
-    let mut input = String::new();
-    match io::stdin().read_to_string(&mut input) {
-        Ok(_) => {
-            let decoded = decoder::decode(&input.trim().to_owned());
-            let decoded_as_string = std::str::from_utf8(&decoded).unwrap();
-            print!("{}", decoded_as_string);
-        },
-
-        Err(_) => error("Unable to read STDIN"),
-    }
+fn decode(input: &String) -> String {
+    let decoded = decoder::decode(input);
+    let decoded_as_string = std::str::from_utf8(&decoded).unwrap();
+    decoded_as_string.to_owned()
 }
 
 #[cfg(test)]
