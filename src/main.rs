@@ -14,9 +14,14 @@ enum CLIError {
 impl std::fmt::Debug for CLIError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self {
-            Self::TooLittleArguments => write!(f, "Too little arguments provided"),
-            Self::InvalidSubcommand(cmd) => write!(f, "Invalid subcommand provided: \"{}\"", cmd),
-            Self::StdInUnreadable => write!(f, "Unable to read STDIN"),
+            Self::TooLittleArguments =>
+                write!(f, "Too little arguments provided"),
+
+            Self::InvalidSubcommand(cmd) =>
+                write!(f, "Invalid subcommand provided: \"{}\"", cmd),
+
+            Self::StdInUnreadable =>
+                write!(f, "Unable to read STDIN"),
         }
     }
 }
