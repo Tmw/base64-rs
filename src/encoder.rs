@@ -1,5 +1,5 @@
-use std::iter::FromIterator;
 use crate::alphabet::{Alphabet, Classic};
+use std::iter::FromIterator;
 
 pub fn encode(data: &[u8]) -> String {
     let classic_alphabet = &Classic {};
@@ -17,10 +17,7 @@ pub fn encode_using_alphabet<T: Alphabet>(alphabet: &T, data: &[u8]) -> String {
 
 fn split(chunk: &[u8]) -> Vec<u8> {
     match chunk.len() {
-        1 => vec![
-            &chunk[0] >> 2,
-            (&chunk[0] & 0b00000011) << 4
-        ],
+        1 => vec![&chunk[0] >> 2, (&chunk[0] & 0b00000011) << 4],
 
         2 => vec![
             &chunk[0] >> 2,
@@ -32,10 +29,10 @@ fn split(chunk: &[u8]) -> Vec<u8> {
             &chunk[0] >> 2,
             (&chunk[0] & 0b00000011) << 4 | &chunk[1] >> 4,
             (&chunk[1] & 0b00001111) << 2 | &chunk[2] >> 6,
-            &chunk[2] & 0b00111111
+            &chunk[2] & 0b00111111,
         ],
 
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 
@@ -105,4 +102,3 @@ mod tests {
         assert_eq!(encode(input_data), expected);
     }
 }
-

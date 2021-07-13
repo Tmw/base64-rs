@@ -1,30 +1,33 @@
 use crate::alphabet::{Alphabet, Classic};
+use std::io;
 
-pub fn decode(bytes: &String) -> Vec<u8> {
+pub fn decode(bytes: &String) -> Result<Vec<u8>, io::Error> {
     let alphabet = Classic {};
     decode_using_alphabet(alphabet, bytes)
 }
 
-pub fn decode_using_alphabet<T: Alphabet>(alphabet: T, data: &String) -> Vec<u8> {
+pub fn decode_using_alphabet<T: Alphabet>(alphabet: T, data: &String) -> Result<Vec<u8>, io::Error> {
     // if data is not multiple of four bytes, data is invalid
     if data.chars().count() % 4 != 0 {
-        panic!("Invalid data");
+        return Err(io::Error::from(io::ErrorKind::InvalidInput));
     }
 
-    data
+    let result = data
         .chars()
         .collect::<Vec<char>>()
         .chunks(4)
-        .map(|chunk| original(&alphabet, chunk) )
+        .map(|chunk| original(&alphabet, chunk))
         .flat_map(stitch)
-        .collect()
+        .collect();
+
+    Ok(result)
 }
 
 fn original<T: Alphabet>(alphabet: &T, chunk: &[char]) -> Vec<u8> {
     chunk
         .iter()
         .filter(|character| *character != &alphabet.get_padding_char())
-        .map(|character| { 
+        .map(|character| {
             alphabet
                 .get_index_for_char(*character)
                 .expect("unable to find character in alphabet")
@@ -51,7 +54,7 @@ fn stitch(bytes: Vec<u8>) -> Vec<u8> {
             (bytes[2] & 0b00000011) << 6 | bytes[3] & 0b00111111,
         ],
 
-        _ => unimplemented!("number of bytes must be 2 - 4")
+        _ => unreachable!(),
     };
 
     out.into_iter().filter(|&x| x > 0).collect()
@@ -60,26 +63,40 @@ fn stitch(bytes: Vec<u8>) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::decode;
+    use std::io;
 
     #[test]
     fn decode_one() {
         let encoded = String::from("YQ==");
         let expected = "a".as_bytes();
-        assert_eq!(decode(&encoded), expected);
+
+        assert!(decode(&encoded).is_ok());
+        assert_eq!(decode(&encoded).unwrap(), expected);
     }
 
     #[test]
     fn decode_two() {
         let encoded = String::from("YWI=");
         let expected = "ab".as_bytes();
-        assert_eq!(decode(&encoded), expected);
+        assert!(decode(&encoded).is_ok());
+        assert_eq!(decode(&encoded).unwrap(), expected);
     }
 
     #[test]
     fn decode_three() {
         let encoded = String::from("YWJj");
         let expected = "abc".as_bytes();
-        assert_eq!(decode(&encoded), expected);
+        assert!(decode(&encoded).is_ok());
+        assert_eq!(decode(&encoded).unwrap(), expected);
+    }
+
+    #[test]
+    fn invalid_data() {
+        let encoded = String::from("d91jd");
+        assert!(decode(&encoded).is_err());
+        assert_eq!(
+            decode(&encoded).unwrap_err().kind(),
+            io::ErrorKind::InvalidInput
+        );
     }
 }
-
