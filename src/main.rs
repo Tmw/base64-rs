@@ -6,7 +6,7 @@ use std::fmt;
 use std::io::{self, Read};
 
 enum CLIError {
-    TooLittleArguments,
+    TooFewArguments,
     InvalidSubcommand(String),
     StdInUnreadable,
     DecodingError,
@@ -15,7 +15,7 @@ enum CLIError {
 impl std::fmt::Debug for CLIError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self {
-            Self::TooLittleArguments => write!(f, "Too little arguments provided"),
+            Self::TooFewArguments => write!(f, "Not enough arguments provided"),
 
             Self::InvalidSubcommand(cmd) => write!(f, "Invalid subcommand provided: \"{}\"", cmd),
 
@@ -28,12 +28,12 @@ impl std::fmt::Debug for CLIError {
 
 fn main() -> Result<(), CLIError> {
     if std::env::args().count() < 2 {
-        return Err(CLIError::TooLittleArguments);
+        return Err(CLIError::TooFewArguments);
     }
 
     let subcommand = std::env::args()
         .nth(1)
-        .ok_or_else(|| CLIError::TooLittleArguments)?;
+        .ok_or_else(|| CLIError::TooFewArguments)?;
 
     let input = read_stdin()?;
 
