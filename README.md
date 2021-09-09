@@ -9,11 +9,11 @@ This project is built and run using cargo.
 
 ```bash
 # encoding
-echo "fluffy pancakes" | cargo run -- encode
+echo 'fluffy pancakes' | cargo run -- encode
 > Zmx1ZmZ5IHBhbmNha2Vz
 
 # and the reverse
-echo "Zmx1ZmZ5IHBhbmNha2Vz" | cargo run -- decode
+echo 'Zmx1ZmZ5IHBhbmNha2Vz' | cargo run -- decode
 > fluffy pancakes
 ```
 
