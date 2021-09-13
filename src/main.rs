@@ -43,7 +43,7 @@ fn main() -> Result<(), CLIError> {
         cmd => Err(CLIError::InvalidSubcommand(cmd.to_string())),
     }?;
 
-    print!("{}", output);
+    println!("{}", output);
 
     Ok(())
 }
@@ -64,8 +64,7 @@ fn encode(input: &String) -> String {
 fn decode(input: &String) -> Result<String, CLIError> {
     let decoded = decoder::decode(input).map_err(|_| CLIError::DecodingError)?;
 
-    let decoded_as_string = std::str::from_utf8(&decoded)
-        .map_err(|_| CLIError::DecodingError)?;
+    let decoded_as_string = std::str::from_utf8(&decoded).map_err(|_| CLIError::DecodingError)?;
 
     Ok(decoded_as_string.to_owned())
 }
